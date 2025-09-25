@@ -380,6 +380,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const host = location.hostname;
   const isStaging =
     host.includes("webflow.io") || host.includes("pixelbinz0.de");
+
+  const searchContainer = document.getElementById("searchContainer");
+  const dataset = searchContainer ? searchContainer.dataset : {};
+  const readDataset = (key) => {
+    const value = dataset?.[key];
+    return typeof value === "string" ? value.trim() : "";
+  };
+  const defaultClientKey = readDataset("clientKey");
+  const stagingClientKey =
+    readDataset("clientKeyStaging") || readDataset("stagingClientKey");
+  const productionClientKey =
+    readDataset("clientKeyProduction") || readDataset("productionClientKey");
+  const resolvedProdKey = productionClientKey || defaultClientKey || "1234567";
+  const resolvedStagingKey =
+    stagingClientKey || defaultClientKey || resolvedProdKey;
   const PB_ENV = {
     API_URL: isStaging
       ? "https://api.pixelbinz0.de/service/panel/assets/v1.0/upload/direct"
@@ -390,9 +405,26 @@ document.addEventListener("DOMContentLoaded", () => {
     CONSOLE_BASE: isStaging
       ? "https://console.pixelbinz0.de"
       : "https://console.pixelbin.io",
+    CLIENT_KEY: isStaging ? resolvedStagingKey : resolvedProdKey,
   };
   window.PB_ENV = PB_ENV;
   if (PB_DEBUG) console.info("[PB_ENV]", PB_ENV);
+
+  const buildUploadUrl = (orgId) => {
+    if (!orgId) return PB_ENV.API_URL;
+    try {
+      const url = new URL(PB_ENV.API_URL);
+      url.pathname = url.pathname.replace(
+        /\/upload\/direct$/,
+        `/org/${encodeURIComponent(orgId)}/upload/direct`
+      );
+      return url.toString();
+    } catch (e) {
+      if (PB_DEBUG)
+        console.error("[upload] failed to build org upload URL; using default", e);
+      return PB_ENV.API_URL;
+    }
+  };
 
   const hexSha256 = (s) => CryptoJS.SHA256(s).toString();
   const hexHmac = (k, s) => CryptoJS.HmacSHA256(s, k).toString();
@@ -493,8 +525,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (/[^0-9A-Za-z;,/?:@&=+$\-_.!~*'()#%]/.test(p))
         p = encodeURI(decodeURI(p));
       const parts = p.split("/").reduce((acc, seg) => {
+        if (!seg || seg === ".") return acc;
         if (seg === "..") acc.pop();
-        else if (seg !== ".") acc.push(encRFC3986(seg));
+        else acc.push(encRFC3986(seg));
         return acc;
       }, []);
       return "/" + parts.join("/");
@@ -522,7 +555,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!h["x-ebg-param"]) h["x-ebg-param"] = this._ts();
       delete h["x-ebg-signature"];
       delete h["X-Ebg-Signature"];
-      const clientKey = "1234567"; // replace if your backend expects a different client key
+      const clientKeyCandidate =
+        typeof PB_ENV?.CLIENT_KEY === "string" ? PB_ENV.CLIENT_KEY.trim() : "";
+      const clientKey = clientKeyCandidate || "1234567";
+      if (
+        !clientKeyCandidate &&
+        PB_DEBUG &&
+        !PB_ENV.__warnedFallbackClientKey
+      ) {
+        PB_ENV.__warnedFallbackClientKey = true;
+        console.warn(
+          "[Signer] Using fallback client key; set data-client-key attributes for production values."
+        );
+      }
       h["x-ebg-signature"] = "v1:" + hexHmac(clientKey, this._stringToSign());
       if (PB_DEBUG) console.debug("[Signer] headers", h);
       return this.r;
@@ -611,7 +656,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const datePart = new Date().toISOString().split("T")[0];
     form.append("path", filenameOverride ? `__editor/${datePart}` : "");
 
-    const { host, pathname, search } = new URL(PB_ENV.API_URL);
+    const apiUrl = buildUploadUrl(orgId);
+    const { host, pathname, search } = new URL(apiUrl);
     const signed = new PB_RequestSigner({
       host,
       method: "POST",
@@ -622,7 +668,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", PB_ENV.API_URL);
+      xhr.open("POST", apiUrl);
       xhr.withCredentials = true;
       xhr.setRequestHeader(
         "x-ebg-signature",
@@ -814,4 +860,4 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 })();
 
-console.log("Anurag's webflowscript.js loaded");
+console.log("webflowscript.js init done");

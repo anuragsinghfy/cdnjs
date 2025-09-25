@@ -859,5 +859,3 @@ document.addEventListener("DOMContentLoaded", () => {
     handleSubmit(e.detail);
   });
 })();
-
-console.log("webflowscript.js init done");

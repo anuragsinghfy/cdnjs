@@ -7,17 +7,17 @@ async function checkUserSession() {
     hostname.includes("webflow.io") ||
     hostname.includes("watermarkremoverz0.de")
   ) {
-    baseApiUrl = "https://api.pixelbinz0.de"; // staging
+    baseApiUrl = "https://api.watermarkremoverz0.de"; // staging
     ebgSignature =
-      "v1:afdecd809329f3827059d4a7c2e9aaf15a98cd46b2b818a3eecee29b64b06066";
+      "v1:484bd35d910104abda1830f4d8b8f99f547f4a995b213cd5e977201727a4caef";
     ebgParam = "MjAyNTA1MjhUMDk0MDA5Wg==";
   } else if (hostname.endsWith("watermarkremover.io")) {
-    baseApiUrl = "https://api.pixelbin.io"; // production
+    baseApiUrl = "https://api.watermarkremover.io"; // production
     ebgSignature =
-      "v1:54c02cba15001bd4ec8059bc1bcd9a2dfe59226eb9ba58b9dd8fa70fe76abc30";
-    ebgParam = "MjAyNTA1MjhUMDkyOTMzWg==";
+      "v1:361c654f394638e8744650056689e9ba1d3047a6a3aa994168ad1733b85aee1a";
+    ebgParam = "MjAyNTEwMTNUMDcyMDE1Wg==";
   } else {
-    baseApiUrl = "https://api.pixelbin.io"; // fallback to prod
+    baseApiUrl = "https://api.watermarkremover.io"; // fallback to prod
   }
   const URL = `${baseApiUrl}/service/panel/users/v1.0/session`;
   const headers = {
@@ -50,7 +50,7 @@ async function checkUserSession() {
     elements.forEach((element) => setDisplay(element, value));
 
   function setDataFetchingState() {
-    setDisplay(loginBtn, "none");
+    // setDisplay(loginBtn, "none");
     setDisplayForAll(userProfile, "none");
     setDisplayForAll(signUp, "flex");
     setDisplayForAll(signUpDivs, "none");
@@ -58,7 +58,8 @@ async function checkUserSession() {
   }
   function setDataFetchingDoneState(isLoggedIn) {
     if (isLoggedIn) {
-      setDisplay(loginBtn, "none");
+      // setDisplay(loginBtn, "none");
+      loginBtn.innerHTML = "Logged In";
       setDisplayForAll(signUp, "none");
       setDisplayForAll(userProfile, "flex");
     } else {

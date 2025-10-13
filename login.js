@@ -10,7 +10,7 @@ async function checkUserSession() {
     baseApiUrl = "https://api.watermarkremoverz0.de"; // staging
     ebgSignature =
       "v1:484bd35d910104abda1830f4d8b8f99f547f4a995b213cd5e977201727a4caef";
-    ebgParam = "MjAyNTA1MjhUMDk0MDA5Wg==";
+    ebgParam = "MjAyNTEwMTNUMDczMDMxWg==";
   } else if (hostname.endsWith("watermarkremover.io")) {
     baseApiUrl = "https://api.watermarkremover.io"; // production
     ebgSignature =

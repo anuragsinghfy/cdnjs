@@ -1,22 +1,26 @@
 function appendRedirectPath() {
-  const loginBtn = document.querySelector("#login-btn");
+  const buttons = [
+    document.querySelector("#login-btn"),
+    document.querySelector("#signup-btn"),
+  ].filter(Boolean);
 
-  if (!loginBtn) {
+  if (!buttons.length) {
     return;
   }
 
-  const hrefAttr = loginBtn.getAttribute("href") || "";
   const redirectPath = window.location.pathname || "/";
 
-  try {
-    const loginUrl = new URL(hrefAttr, window.location.origin);
-
-    loginUrl.searchParams.set("redirectPath", redirectPath);
-    loginUrl.searchParams.set("redirectToFreePropertyFlow", "true");
-    loginBtn.href = loginUrl.toString();
-  } catch (error) {
-    console.error("Failed to update login redirect path:", error);
-  }
+  buttons.forEach((btn) => {
+    const hrefAttr = btn.getAttribute("href") || "";
+    try {
+      const url = new URL(hrefAttr, window.location.origin);
+      url.searchParams.set("redirectPath", redirectPath);
+      url.searchParams.set("redirectToFreePropertyFlow", "true");
+      btn.href = url.toString();
+    } catch (error) {
+      console.error("Failed to update redirect path:", error);
+    }
+  });
 }
 
 function initLoginFlow() {

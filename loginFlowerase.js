@@ -37,18 +37,15 @@ const EBG_SECRET = "1234567"; // from src/services/interceptors/signature.js
 let __baseApiUrl__;
 try {
   const hostname = window.location.hostname;
-  if (
-    hostname.includes("webflow.io") ||
-    hostname.includes("upscalez0.de")
-  ) {
-    __baseApiUrl__ = "https://api.upscalez0.de"; // staging
-  } else if (hostname.endsWith("upscale.media")) {
-    __baseApiUrl__ = "https://api.upscale.media"; // production
+  if (hostname.includes("webflow.io") || hostname.includes("erasez0.de")) {
+    __baseApiUrl__ = "https://api.erasez0.de"; // staging
+  } else if (hostname.endsWith("erase.bg")) {
+    __baseApiUrl__ = "https://api.erase.bg"; // production
   } else {
-    __baseApiUrl__ = "https://api.upscale.media"; // fallback to prod
+    __baseApiUrl__ = "https://api.erase.bg"; // fallback to prod
   }
 } catch (_) {
-  __baseApiUrl__ = "https://api.upscale.media";
+  __baseApiUrl__ = "https://api.erase.bg";
 }
 const AUTH_ENDPOINT = `${__baseApiUrl__}/service/panel/users/v1.0/authentication/token`;
 
